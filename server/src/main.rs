@@ -29,48 +29,21 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let block_size = (range / machines.len() as u32) + 1;
 
-    for (index, hostname) in machines.iter() {
-        //let start = index * ;
-        let start = (index * block_size).min(range);
-        let end = ((index + 1) * block_size).min(range);
-        let uri: hyper::Uri = format!("http://{}.cs.unh.edu:8000/pi/{}/{}/{}", hostname, precision, start, end).parse()?;
-
-        println!("going to request: {}", uri.to_string());
-        let resp = client.get(uri);
-        resps.push(resp);
-    }
-
     resps = machines.par_iter().map(|(index, hostname)| {
         //
         let start = (index * block_size).min(range);
         let end = ((index + 1) * block_size).min(range);
-        let uri: hyper::Uri = format!("http://{}.cs.unh.edu:8000/pi/{}/{}/{}", hostname, precision, start, end).parse().unwrap();
-
-        println!("going to request: {}", uri.to_string());
-        let resp = client.get(uri);
-        resp
+        let uri = format!("http://{}.cs.unh.edu:8000/pi/{}/{}/{}", hostname, precision, start, end);
+        do_req(uri).expect("do_req returned failure")
     }).collect();
 
     let mut running = rug::Float::with_val(precision, 0);
 
-    // do awaits
-    let bodies = resps.par_iter_mut().map(|resp| {
-        let r = resp.await.unwrap();
-        let body = r.into_body();
-        body
-    }).collect::<Vec<hyper::body::Body>>();
-
-    for el in resps.iter_mut() {
-        let r = el.await?;
-        let body = r.into_body();
-        //body.to_bytes();
-        let bytes = hyper::body::to_bytes(body).await.unwrap();
-        let utf8 = str::from_utf8(&bytes).unwrap();
-        let next: rug::Float = serde_json::from_str(utf8).unwrap();
-        //println!("int res of {}", next.to_string());
-        running = running + next;
-        //let next: rug::Float = serde_json::from_str(r.into_body().).unwrap();
+    for res in resps {
+        running = running + res;
     }
+
+    // do awaits
 
     println!("Result of computation: {}", running.to_string());
 
@@ -83,8 +56,11 @@ fn do_req(uri: String) -> Result<rug::Float, Box<dyn std::error::Error>> {
         if resp.status().is_success() {
             let text = resp.text()?;
             let parsed: rug::Float = serde_json::from_str(&text[..]).unwrap();
+            return Ok(parsed);
         } else {
             // try again?
+            println!("Failed to request from {}, trying again...", uri);
+            continue
         }
     }
 }
