@@ -20,9 +20,9 @@ fn main() {
 
 #[get("/pi/<precision>/<start>/<end>")]
 fn handler(precision: u32, start: usize, end: usize) -> String {
-    println!("called with: {}, {}, {}", precision, start, end);
+    //println!("called with: {}, {}, {}", precision, start, end);
     let r = par_calc(precision, start, end);
-    println!("returns {}", r);
+    //println!("returns {}", r);
     let serialized = serde_json::to_string(&r).unwrap();
     serialized
 }
@@ -41,7 +41,7 @@ fn par_calc(precision: u32, start: usize, end: usize) -> rug::Float {
     });*/
 
     let rvec = (start..end).collect_vec();
-    println!("rvec is {:?}", rvec);
+    //println!("rvec is {:?}", rvec);
     let rvec: Vec<rug::Float> = rvec
         .into_par_iter()
         .chunks(((end - start) / num_cpus).max(1))
@@ -49,7 +49,7 @@ fn par_calc(precision: u32, start: usize, end: usize) -> rug::Float {
         .collect();
 
     //&vec_chunks[..].par_iter();
-    println!("rvec after map is {:?}", rvec);
+    //println!("rvec after map is {:?}", rvec);
 
     let fref = rvec.into_par_iter().reduce( || rug::Float::with_val(precision, 0), |a, b| { a + b });
 
