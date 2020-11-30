@@ -1,6 +1,11 @@
 extern crate hyper;
 use hyper::Client;
 
+use rug::ops::Pow;
+use rug::{Assign, Float};
+use serde::{Serialize};
+use std::str;
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     //let mut stream = TcpStream::
@@ -12,7 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let mut resps = Vec::new();
 
     let mut machines: Vec<(u32, String)> = Vec::new();
-    for i in 1..=100 {
+    for i in 1..=10 {
         machines.push((i - 1, format!("hpc1")));
     }
 
@@ -29,9 +34,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         resps.push(resp);
     }
 
+    let mut running = rug::Float::with_val(precision, 0);
+
     for el in resps.iter_mut() {
-        el.await?;
+        let r = el.await?;
+        let body = r.into_body();
+        //body.to_bytes();
+        let bytes = hyper::body::to_bytes(body).await.unwrap();
+        let utf8 = str::from_utf8(&bytes).unwrap();
+        let next: rug::Float = serde_json::from_str(utf8).unwrap();
+        println!("int res of {}", next.to_string());
+        running = running + next;
+        //let next: rug::Float = serde_json::from_str(r.into_body().).unwrap();
     }
+
+    println!("Result of computation: {}", running.to_string());
 
     return Ok(())
 }
