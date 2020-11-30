@@ -56,9 +56,9 @@ fn par_calc(precision: u32, start: usize, end: usize) -> rug::Float {
 fn calculate(precision: u32, start: usize, end: usize) -> rug::Float {
     // start and end signify the nth term, non-inclusive
     // if start > end then result is zero
-    println!("calculate called with {}, {}", start, end);
+    //println!("calculate called with {}, {}", start, end);
     if start > end {
-        println!("Return 0\n");
+        //println!("Return 0\n");
         rug::Float::with_val(precision, 0)
     } else {
         let mut sum = rug::Float::with_val(precision, 0);
@@ -69,7 +69,7 @@ fn calculate(precision: u32, start: usize, end: usize) -> rug::Float {
             let denominator_2 = rug::Float::with_val(precision, 3).pow(iter as u64);
 
             let denominator = denominator_1 * denominator_2;
-            println!("term num, den are {}, {} for term {}", numerator.to_string(), denominator.to_string(), iter);
+            //println!("term num, den are {}, {} for term {}", numerator.to_string(), denominator.to_string(), iter);
 
             let term = numerator / denominator;
 
