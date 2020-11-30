@@ -4,6 +4,8 @@ use itertools::Itertools;
 use rayon::prelude::*;
 use rug::ops::Pow;
 use rug::{Assign, Float};
+use serde::{Serialize, Serializer};
+use serde_json::{Result, Value};
 
 
 #[macro_use] extern crate rocket;
@@ -21,7 +23,8 @@ fn handler(precision: u32, start: usize, end: usize) -> String {
     println!("called with: {}, {}, {}", precision, start, end);
     let r = par_calc(precision, start, end);
     println!("returns {}", r);
-    r.to_string()
+    let serialized = serde_json::to_string(&r).unwrap();
+    serialized
 }
 
 fn par_calc(precision: u32, start: usize, end: usize) -> rug::Float {

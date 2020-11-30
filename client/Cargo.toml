@@ -13,5 +13,7 @@ itertools = "0.9.0"
 num_cpus = "1.13.0"
 rayon = "1.5.0"
 rocket = "0.4.6"
-rug = "1.11.0"
+rug = { version = "1.11.0", features = ["serde"] }
+serde = "1.0.117"
+serde_json = "1.0.59"
 #tokio = { version = "0.3.4", features = ["full"] }
