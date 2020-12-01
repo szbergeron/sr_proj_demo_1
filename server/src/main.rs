@@ -15,10 +15,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let client = Client::new();
 
     let precision: u32 = 100000;
-    let range: u32 = 100000;
+    let range: u32 = 1000000;
 
     let start_machine = 1;
-    let end_machine = 2;
+    let end_machine = 6;
 
     let mut resps = Vec::new();
 
@@ -52,7 +52,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
 fn do_req(uri: String) -> Result<rug::Float, Box<dyn std::error::Error>> {
     loop {
-        let mut resp = reqwest::blocking::get(&uri[..])?;
+        let timeout = std::time::Duration::from_secs(1000);
+        let client = reqwest::blocking::Client::builder().timeout(timeout).build()?;
+        let resp = client.get(&uri[..]).send()?;
         if resp.status().is_success() {
             let text = resp.text()?;
             let parsed: rug::Float = serde_json::from_str(&text[..]).unwrap();
