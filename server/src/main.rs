@@ -1,24 +1,25 @@
 extern crate hyper;
-use hyper::Client;
-use std::io::Read;
+//use hyper::Client;
+//use std::io::Read;
 
-use rug::ops::Pow;
-use rug::{Assign, Float};
-use serde::{Serialize};
-use std::str;
+
+
+
 use rayon::prelude::*;
 
 //#[tokio::main]
+#[allow(unused_assignments)]
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     //let mut stream = TcpStream::
     println!("Usage: ./req <precision> <iterations>");
-    let client = Client::new();
+    //let client = Client::new();
 
     let precision: u32 = 100000;
     let range: u32 = 1000000;
 
     let start_machine = 1;
     let end_machine = 6;
+
 
     let mut resps = Vec::new();
 
